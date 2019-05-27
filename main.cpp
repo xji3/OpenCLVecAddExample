@@ -97,9 +97,19 @@ int main( int argc, char* argv[] )
     kernel = clCreateKernel(program, "vecAdd", &err);
 
     // Create the input and output arrays in device memory for our calculation
-    d_a = clCreateBuffer(context, CL_MEM_READ_ONLY, bytes, NULL, NULL);
-    d_b = clCreateBuffer(context, CL_MEM_READ_ONLY, bytes, NULL, NULL);
-    d_c = clCreateBuffer(context, CL_MEM_WRITE_ONLY, bytes, NULL, NULL);
+    cl_mem d_test = clCreateBuffer(context, CL_MEM_READ_WRITE, 3 * bytes, NULL, NULL);
+//    d_a = clCreateBuffer(context, CL_MEM_READ_ONLY, bytes, NULL, NULL);
+//    d_b = clCreateBuffer(context, CL_MEM_READ_ONLY, bytes, NULL, NULL);
+//    d_c = clCreateBuffer(context, CL_MEM_WRITE_ONLY, bytes, NULL, NULL);
+    d_a = d_test;
+    cl_buffer_region dPtrRegion;
+    dPtrRegion.origin = bytes;
+    dPtrRegion.size = bytes;
+    d_b = clCreateSubBuffer(d_test, CL_MEM_READ_ONLY, CL_BUFFER_CREATE_TYPE_REGION, &dPtrRegion, &err);
+    dPtrRegion.origin = bytes * 2;
+    dPtrRegion.size = bytes;
+    d_c = clCreateSubBuffer(d_test, CL_MEM_WRITE_ONLY, CL_BUFFER_CREATE_TYPE_REGION, &dPtrRegion, &err);
+
 
     // Write our data set into the input array in device memory
     err = clEnqueueWriteBuffer(queue, d_a, CL_TRUE, 0,
